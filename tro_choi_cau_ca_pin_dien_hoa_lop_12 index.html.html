@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trò chơi Câu cá – Pin điện hóa lớp 12</title>
+<style>
+:root{--blue:#087eaa;--deep:#07506f;--light:#e9f8ff;--gold:#ffc857}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(#bcecff,#e9fbff 58%,#8bd4e8);color:#123}
+header{text-align:center;padding:26px 16px 12px} h1{margin:0;color:#064d70;font-size:clamp(25px,4vw,38px)}
+header p{margin:9px auto;max-width:760px;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding:12px 16px 36px}
+.panel{background:#ffffffed;border:2px solid #79c9e5;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 6px 18px #23647a22}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-weight:bold;color:#07506f}
+.progress{height:12px;background:#d8edf5;border-radius:20px;overflow:hidden;margin:12px 0 18px}.bar{height:100%;width:0;background:#13a6a0;transition:width .3s}
+.q{font-size:18px;font-weight:bold;line-height:1.45;margin:8px 0 14px}
+.opt{display:block;padding:11px 13px;margin:8px 0;border:1.5px solid #b8dce9;border-radius:12px;cursor:pointer;background:#f7fcff}
+.opt:hover{background:#e9f8ff;border-color:#35a6c8}.opt input{margin-right:9px;accent-color:#087eaa}
+input.short{width:100%;padding:12px;border:1.5px solid #9bcddd;border-radius:10px;font-size:16px}
+button{border:0;border-radius:12px;padding:12px 19px;background:var(--blue);color:white;font-size:16px;font-weight:bold;cursor:pointer}
+button:hover{background:var(--deep)}button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+#feedback{font-weight:bold;margin-top:12px;line-height:1.5}.good{color:#087d49}.bad{color:#b33a2b}
+.fishing{text-align:center;font-size:50px;letter-spacing:8px;margin:8px}
+.hidden{display:none}.result{text-align:center}.result h2{color:#07506f}
+small{color:#456} footer{text-align:center;color:#23566a;font-size:13px;padding:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎣 CHINH PHỤC ĐẠI DƯƠNG PIN ĐIỆN HÓA</h1>
+  <p>Trò chơi ôn tập Hóa học 12 – Chủ đề <b>Pin điện hóa</b>. Trả lời đúng để câu được cá và tích lũy điểm nhé!</p>
+  <div class="fishing" aria-hidden="true">🐟 🐠 🐡</div>
+</header>
+<main class="wrap">
+  <section class="panel" id="game">
+    <div class="top"><span id="counter">Câu 1 / 9</span><span>🎯 Điểm: <span id="score">0</span></span><span>🐟 Cá đã câu: <span id="caught">0</span></span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="question"></div>
+    <div id="feedback" aria-live="polite"></div>
+    <div class="actions">
+      <button id="check">🎣 Kiểm tra – Câu cá</button>
+      <button id="next" disabled>Câu tiếp theo ➜</button>
+    </div>
+  </section>
+  <section class="panel result hidden" id="result">
+    <div class="fishing">🏆 🐟 🎉</div>
+    <h2>Hoàn thành chuyến đi câu!</h2>
+    <p id="summary"></p>
+    <p id="comment"></p>
+    <button onclick="restart()">Chơi lại</button>
+    <button onclick="window.print()">In kết quả / Lưu PDF</button>
+  </section>
+  <section class="panel">
+    <b>📌 Cách chơi:</b> Có 5 câu trắc nghiệm nhiều lựa chọn, 2 câu đúng/sai và 2 câu trả lời ngắn. Chọn/nhập đáp án rồi bấm <b>Kiểm tra – Câu cá</b>. Mỗi câu đúng được 10 điểm và câu được một chú cá.
+  </section>
+</main>
+<footer>Sản phẩm học tập tương tác – Hóa học 12</footer>
+<script>
+const questions = [
+ {type:"mc",q:"Trong pin điện hóa (pin Galvani), quá trình nào xảy ra ở anode?",opts:["Quá trình oxi hóa","Quá trình khử","Quá trình trung hòa","Quá trình kết tủa"],a:0,why:"Anode là nơi xảy ra sự oxi hóa; electron được giải phóng từ anode."},
+ {type:"mc",q:"Trong pin điện hóa đang hoạt động, electron di chuyển trong mạch ngoài theo chiều nào?",opts:["Từ cathode đến anode","Từ anode đến cathode","Từ cầu muối sang cathode","Từ dung dịch điện li ra dây dẫn"],a:1,why:"Electron đi trong dây dẫn ngoài từ anode (cực âm) đến cathode (cực dương)."},
+ {type:"mc",q:"Trong pin Daniell Zn–Cu, điện cực nào là anode?",opts:["Điện cực Cu","Điện cực Zn","Cả Zn và Cu","Không xác định được"],a:1,why:"Zn bị oxi hóa: Zn → Zn²⁺ + 2e, nên Zn là anode."},
+ {type:"mc",q:"Vai trò chính của cầu muối trong pin điện hóa là gì?",opts:["Cung cấp electron cho phản ứng","Ngăn hoàn toàn ion di chuyển","Khép kín mạch điện và duy trì trung hòa điện ở hai dung dịch","Làm tăng khối lượng điện cực cathode"],a:2,why:"Cầu muối cho ion dịch chuyển để khép kín mạch và duy trì trung hòa điện trong các dung dịch."},
+ {type:"mc",q:"Phản ứng tổng quát của pin Daniell Zn–Cu là phương trình nào?",opts:["Zn²⁺ + Cu → Zn + Cu²⁺","Zn + Cu²⁺ → Zn²⁺ + Cu","Zn + Cu → Zn²⁺ + Cu²⁺","Zn²⁺ + Cu²⁺ → Zn + Cu"],a:1,why:"Zn nhường electron, Cu²⁺ nhận electron: Zn + Cu²⁺ → Zn²⁺ + Cu."},
+ {type:"tf",q:"Trong pin điện hóa, cathode là điện cực xảy ra quá trình khử.",a:true,why:"Đúng. Cathode luôn là nơi xảy ra sự khử."},
+ {type:"tf",q:"Trong pin Galvani đang phát điện, anode là cực dương.",a:false,why:"Sai. Trong pin Galvani, anode là cực âm; cathode là cực dương."},
+ {type:"short",q:"Một pin có E°cathode = +0,80 V và E°anode = −0,76 V. Tính suất điện động chuẩn E°pin (đơn vị V).",a:["1.56","1,56"],why:"E°pin = E°cathode − E°anode = 0,80 − (−0,76) = 1,56 V."},
+ {type:"short",q:"Trong pin Zn–Cu, mỗi nguyên tử Zn nhường bao nhiêu electron khi bị oxi hóa thành Zn²⁺? Nhập số.",a:["2","hai"],why:"Zn → Zn²⁺ + 2e, nên mỗi nguyên tử Zn nhường 2 electron."}
+];
+let index=0,score=0,caught=0,answered=false;
+const $=id=>document.getElementById(id);
+function render(){
+ answered=false;$("feedback").textContent="";$("feedback").className="";
+ $("counter").textContent=`Câu ${index+1} / ${questions.length}`;$("score").textContent=score;$("caught").textContent=caught;
+ $("bar").style.width=(index/questions.length*100)+"%";
+ const q=questions[index];let h=`<div class="q">${q.type==="mc"?"🔹 Trắc nghiệm nhiều lựa chọn":q.type==="tf"?"🔸 Đúng hay sai":"✏️ Trả lời ngắn"}<br>${q.q}</div>`;
+ if(q.type==="mc") h+=q.opts.map((o,i)=>`<label class="opt"><input type="radio" name="answer" value="${i}">${String.fromCharCode(65+i)}. ${o}</label>`).join("");
+ else if(q.type==="tf") h+=`<label class="opt"><input type="radio" name="answer" value="true"> Đúng</label><label class="opt"><input type="radio" name="answer" value="false"> Sai</label>`;
+ else h+=`<input class="short" id="shortAnswer" type="text" placeholder="Nhập câu trả lời của em...">`;
+ $("question").innerHTML=h;$("check").disabled=false;$("next").disabled=true;$("next").textContent=index===questions.length-1?"Xem kết quả 🏆":"Câu tiếp theo ➜";
+}
+function check(){
+ if(answered)return;const q=questions[index];let val,ok=false;
+ if(q.type==="short"){val=$("shortAnswer").value.trim().toLowerCase().replace(/\s/g,"");if(!val){$("feedback").textContent="Em hãy nhập câu trả lời trước nhé.";return;}ok=q.a.includes(val);}
+ else {const el=document.querySelector('input[name="answer"]:checked');if(!el){$("feedback").textContent="Em hãy chọn một đáp án nhé.";return;}val=el.value;ok=q.type==="mc"?Number(val)===q.a:(val==="true")===q.a;}
+ answered=true;if(ok){score+=10;caught++;$("feedback").innerHTML="🎉 Chính xác! Em câu được một chú cá!<br>"+q.why;$("feedback").className="good";}
+ else {$("feedback").innerHTML="Chưa chính xác. Đáp án/kiến thức đúng: "+(q.type==="mc"?String.fromCharCode(65+q.a)+". "+q.opts[q.a]:q.type==="tf"?(q.a?"Đúng":"Sai"):(q.a[0]+" V hoặc "+q.a[1]+" V"))+".<br>"+q.why;$("feedback").className="bad";}
+ $("score").textContent=score;$("caught").textContent=caught;$("check").disabled=true;$("next").disabled=false;
+}
+function next(){if(!answered)return;index++;if(index<questions.length)render();else finish();}
+function finish(){
+ $("game").classList.add("hidden");$("result").classList.remove("hidden");$("bar").style.width="100%";
+ $("summary").textContent=`Em đạt ${score}/90 điểm và câu được ${caught}/9 chú cá.`;
+ $("comment").textContent=score>=80?"Xuất sắc! Em đã nắm khá vững kiến thức về pin điện hóa.":score>=60?"Khá tốt! Hãy xem lại phần giải thích ở những câu chưa đúng.":"Cố gắng thêm nhé! Em hãy ôn lại anode, cathode, chiều electron và cách tính E°pin.";
+}
+function restart(){index=0;score=0;caught=0;$("game").classList.remove("hidden");$("result").classList.add("hidden");render();}
+$("check").addEventListener("click",check);$("next").addEventListener("click",next);render();
+</script>
+</body></html>
